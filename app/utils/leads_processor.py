@@ -1,5 +1,6 @@
+# leads_processor.py
 import json
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from .api_client import get_project_leads
 
 def process_leads_data(leads_data: Dict[str, Any]) -> Dict[str, Any]:
@@ -71,7 +72,13 @@ def process_leads_data(leads_data: Dict[str, Any]) -> Dict[str, Any]:
     
     return result
 
-def get_and_process_leads(organisation_id: str, project_id: str, settings) -> Dict[str, Any]:
+def get_and_process_leads(
+    organisation_id: str, 
+    project_id: str, 
+    settings,
+    auth_token: Optional[str] = None,
+    client_id: Optional[str] = None
+) -> Dict[str, Any]:
     """
     Retrieve leads data from API and process it into a more usable format.
     
@@ -79,13 +86,21 @@ def get_and_process_leads(organisation_id: str, project_id: str, settings) -> Di
         organisation_id: The organisation ID
         project_id: The project ID
         settings: Application settings
+        auth_token: Optional token to override settings.bearer_token
+        client_id: Optional client_id to override settings.client_id
         
     Returns:
         Processed leads data
     """
     try:
         # Get raw leads data from API
-        raw_leads_data = get_project_leads(organisation_id, project_id, settings)
+        raw_leads_data = get_project_leads(
+            organisation_id=organisation_id, 
+            project_id=project_id, 
+            settings=settings,
+            auth_token=auth_token,
+            client_id=client_id
+        )
         
         # Process the data
         processed_data = process_leads_data(raw_leads_data)

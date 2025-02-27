@@ -1,6 +1,6 @@
 import google.generativeai as genai
 import json
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional, Callable
 
 class GeminiService:
     """
@@ -9,6 +9,7 @@ class GeminiService:
     def __init__(self, api_key: str):
         self.api_key = api_key
         genai.configure(api_key=api_key)
+        # Initialize the model without tools for standard analysis
         self.model = genai.GenerativeModel(model_name="gemini-1.5-flash")
         
     def analyze_leads(self, leads_data: Dict[str, Any], query: str) -> str:
@@ -43,6 +44,28 @@ class GeminiService:
         # Get response from Gemini
         response = self.model.generate_content(prompt)
         return response.text
+    
+    def create_function_calling_model(self, tools: List[Callable], system_instruction: str = None):
+        """
+        Create a Gemini model with function calling capabilities.
+        
+        Args:
+            tools: List of functions that the model can call
+            system_instruction: Optional system instruction to guide model behavior
+            
+        Returns:
+            A chat object that can be used for conversations with function calling
+        """
+        # Initialize model with tools
+        tool_model = genai.GenerativeModel(
+            model_name="gemini-1.5-flash",
+            tools=tools,
+            system_instruction=system_instruction
+        )
+        
+        # Start a chat session with automatic function calling
+        chat = tool_model.start_chat(enable_automatic_function_calling=True)
+        return chat
     
     def _prepare_context(self, leads_data: Dict[str, Any]) -> str:
         """
